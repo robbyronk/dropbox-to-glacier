@@ -1,23 +1,16 @@
 import com.amazonaws.auth.PropertiesCredentials;
-import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.dropbox.core.*;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
 import org.apache.commons.io.input.TeeInputStream;
-import org.apache.commons.io.output.TeeOutputStream;
 import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.ImageOutputStream;
-import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
@@ -88,7 +81,7 @@ public class Main {
         listChildren(client.getMetadataWithChildren(path), client);
     }
 
-    public static void listChildren(DbxEntry.WithChildren listing, DbxClient client) throws DbxException {
+    private static void listChildren(DbxEntry.WithChildren listing, DbxClient client) throws DbxException {
         for (DbxEntry child : listing.children) {
             if (child.isFile()) {
                 System.out.println(child.path);
@@ -126,7 +119,7 @@ public class Main {
         }
     }
 
-    public static void thumbnailer(InputStream inputStream, String path) throws IOException {
+    private static void thumbnailer(InputStream inputStream, String path) throws IOException {
         ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
         ImageReader imageReader = Iterators.getOnlyElement(ImageIO.getImageReaders(imageInputStream));
         imageReader.setInput(imageInputStream);
@@ -141,7 +134,7 @@ public class Main {
         upload(bucketName, path, baos.toByteArray());
     }
 
-    public static void upload(String bucket, String name, byte[] buf) {
+    private static void upload(String bucket, String name, byte[] buf) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(buf.length);
         s3.putObject(bucket, name, new ByteArrayInputStream(buf), metadata);
