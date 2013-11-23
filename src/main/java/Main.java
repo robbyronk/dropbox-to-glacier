@@ -18,8 +18,9 @@ import java.util.zip.GZIPOutputStream;
 import static org.apache.commons.io.CopyUtils.copy;
 
 public class Main {
-    private static final String bucketName = "buckets";
     private static AmazonS3Client s3;
+    private static String archiveBucket;
+    private static String thumbnailBucket;
 
     private static DbxClient connectToDropbox() {
         Properties properties = new Properties();
@@ -66,10 +67,12 @@ public class Main {
 
     public static void main(String[] args) throws IOException, DbxException {
 
-        s3 = new AmazonS3Client(new PropertiesCredentials(Main.class.getResourceAsStream("s3.properties")));
-//
-//        s3.putObject(new PutObjectRequest("bucketname", key, inputStream, metadata));
-
+        Properties properties = new Properties();
+        InputStream resourceAsStream = Main.class.getResourceAsStream("s3.properties");
+        properties.load(resourceAsStream);
+        archiveBucket = properties.getProperty("archiveBucket");
+        thumbnailBucket = properties.getProperty("thumbnailBucket");
+        s3 = new AmazonS3Client(new PropertiesCredentials(resourceAsStream));
 
         DbxClient client = connectToDropbox();
 
@@ -111,8 +114,7 @@ public class Main {
         try {
             thumbnailer(teeInputStream, path);
             gzipOutputStream.close();
-            //todo change bucket name
-            upload(bucketName, path + ".gz", compressed.toByteArray());
+            upload(archiveBucket, path + ".gz", compressed.toByteArray());
         } finally {
             teeInputStream.close();
             compressed.close();
@@ -130,8 +132,7 @@ public class Main {
         String formatName = imageReader.getFormatName().toLowerCase();
         ImageIO.write(webSize, formatName, baos);
 
-        //todo change bucket name
-        upload(bucketName, path, baos.toByteArray());
+        upload(thumbnailBucket, path, baos.toByteArray());
     }
 
     private static void upload(String bucket, String name, byte[] buf) {
