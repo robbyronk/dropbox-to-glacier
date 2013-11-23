@@ -133,6 +133,10 @@ public class Main {
         ImageIO.write(webSize, formatName, baos);
 
         upload(thumbnailBucket, path, baos.toByteArray());
+        inputStream.close();
+        imageInputStream.close();
+        imageReader.dispose();
+        baos.close();
     }
 
     private static void upload(String bucket, String name, byte[] buf) {
