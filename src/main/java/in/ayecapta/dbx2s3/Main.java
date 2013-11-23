@@ -1,6 +1,6 @@
-import com.amazonaws.auth.AWSCredentials;
+package in.ayecapta.dbx2s3;
+
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.dropbox.core.*;
@@ -16,8 +16,6 @@ import java.io.*;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
-
-import static org.apache.commons.io.CopyUtils.copy;
 
 public class Main {
     private static AmazonS3Client s3;
@@ -95,7 +93,7 @@ public class Main {
                 InputStream body = downloader.body;
                 try {
                     copyToS3(body, child.path);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     System.err.print("Problem copying " + child.path + ". ");
                     System.err.println("DO NOT DELETE.");
                 } finally {
