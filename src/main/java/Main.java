@@ -93,18 +93,16 @@ public class Main {
             if (child.isFile()) {
                 System.out.println(child.path);
 
-//                DbxClient.Downloader downloader = client.startGetFile(child.path, null);
-//                try {
-//                    ByteArrayOutputStream compressed = new ByteArrayOutputStream();
-//                    OutputStream gzipOutputStream = new GZIPOutputStream(compressed);
-//                    InputStream teeInputStream = new TeeInputStream(downloader.body, gzipOutputStream);
-//                    thumbnailer(teeInputStream);
-//                    gzipOutputStream.close();
-//                    upload(bucketName, "kitty.gz", compressed.toByteArray());
-//                    compressed.close();
-//                } finally {
-//                    downloader.close();
-//                }
+                DbxClient.Downloader downloader = client.startGetFile(child.path, null);
+                InputStream body = downloader.body;
+                try {
+                    copyToS3(body, child.path);
+                } catch (IOException e) {
+                    System.err.print("Problem copying " + child.path + ". ");
+                    System.err.println("DO NOT DELETE.");
+                } finally {
+                    downloader.close();
+                }
 
             }
             if (child.isFolder()) {
@@ -113,7 +111,22 @@ public class Main {
         }
     }
 
-    public static void thumbnailer(InputStream inputStream) throws IOException {
+    private static void copyToS3(InputStream body, String path) throws IOException {
+        ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+        OutputStream gzipOutputStream = new GZIPOutputStream(compressed);
+        InputStream teeInputStream = new TeeInputStream(body, gzipOutputStream);
+        try {
+            thumbnailer(teeInputStream, path);
+            gzipOutputStream.close();
+            //todo change bucket name
+            upload(bucketName, path + ".gz", compressed.toByteArray());
+        } finally {
+            teeInputStream.close();
+            compressed.close();
+        }
+    }
+
+    public static void thumbnailer(InputStream inputStream, String path) throws IOException {
         ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
         ImageReader imageReader = Iterators.getOnlyElement(ImageIO.getImageReaders(imageInputStream));
         imageReader.setInput(imageInputStream);
@@ -124,7 +137,8 @@ public class Main {
         String formatName = imageReader.getFormatName().toLowerCase();
         ImageIO.write(webSize, formatName, baos);
 
-        upload(bucketName, "kitty." + formatName, baos.toByteArray());
+        //todo change bucket name
+        upload(bucketName, path, baos.toByteArray());
     }
 
     public static void upload(String bucket, String name, byte[] buf) {
