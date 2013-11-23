@@ -1,3 +1,5 @@
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -72,7 +74,7 @@ public class Main {
         properties.load(resourceAsStream);
         archiveBucket = properties.getProperty("archiveBucket");
         thumbnailBucket = properties.getProperty("thumbnailBucket");
-        s3 = new AmazonS3Client(new PropertiesCredentials(resourceAsStream));
+        s3 = new AmazonS3Client(new BasicAWSCredentials(properties.getProperty("accessKey"), properties.getProperty("secretKey")));
 
         DbxClient client = connectToDropbox();
 
