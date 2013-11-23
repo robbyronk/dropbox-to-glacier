@@ -82,22 +82,33 @@ public class Main {
 
         System.out.println("Linked account: " + client.getAccountInfo().displayName);
 
-        client.createFolder("/Test");
-        DbxEntry.WithChildren listing = client.getMetadataWithChildren("/Test");
+        String path = "/Test";
+        client.createFolder(path);
         System.out.println("Files in the root path:");
-        for (DbxEntry child : listing.children) {
-            DbxClient.Downloader downloader = client.startGetFile(child.path, null);
+        listChildren(client.getMetadataWithChildren(path), client);
+    }
 
-            ByteArrayOutputStream compressed = new ByteArrayOutputStream();
-            OutputStream gzipOutputStream = new GZIPOutputStream(compressed);
-            try {
-                InputStream teeInputStream = new TeeInputStream(downloader.body, gzipOutputStream);
-                thumbnailer(teeInputStream);
-                gzipOutputStream.close();
-                upload(bucketName, "kitty.gz", compressed.toByteArray());
-                compressed.close();
-            } finally {
-                downloader.close();
+    public static void listChildren(DbxEntry.WithChildren listing, DbxClient client) throws DbxException {
+        for (DbxEntry child : listing.children) {
+            if (child.isFile()) {
+                System.out.println(child.path);
+
+//                DbxClient.Downloader downloader = client.startGetFile(child.path, null);
+//                try {
+//                    ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+//                    OutputStream gzipOutputStream = new GZIPOutputStream(compressed);
+//                    InputStream teeInputStream = new TeeInputStream(downloader.body, gzipOutputStream);
+//                    thumbnailer(teeInputStream);
+//                    gzipOutputStream.close();
+//                    upload(bucketName, "kitty.gz", compressed.toByteArray());
+//                    compressed.close();
+//                } finally {
+//                    downloader.close();
+//                }
+
+            }
+            if (child.isFolder()) {
+                listChildren(client.getMetadataWithChildren(child.path), client);
             }
         }
     }
