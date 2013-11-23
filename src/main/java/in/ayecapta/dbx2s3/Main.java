@@ -25,9 +25,9 @@ public class Main {
     private static DbxClient connectToDropbox() {
         Properties properties = new Properties();
         try {
-            InputStream stream = Main.class.getResourceAsStream("dropbox.properties");
-            properties.load(stream);
-            stream.close();
+            InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("dropbox.properties");
+            properties.load(resourceAsStream);
+            resourceAsStream.close();
         } catch (IOException e) {
             System.err.println("Unable to read dropbox.properties, can't continue. Sorry!");
             throw new RuntimeException(e);
@@ -68,7 +68,7 @@ public class Main {
     public static void main(String[] args) throws IOException, DbxException {
 
         Properties properties = new Properties();
-        InputStream resourceAsStream = Main.class.getResourceAsStream("s3.properties");
+        InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("s3.properties");
         properties.load(resourceAsStream);
         archiveBucket = properties.getProperty("archiveBucket");
         thumbnailBucket = properties.getProperty("thumbnailBucket");
