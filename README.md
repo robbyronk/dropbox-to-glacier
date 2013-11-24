@@ -9,6 +9,7 @@ Create `/src/main/resources/dropbox.properties`:
 app_key=<your dropbox app key>
 app_secret=<your dropbox app secret>
 accessToken=<your dropbox accessToken>
+```
 
 Create `/src/main/resources/s3.properties`:
 ```ini
