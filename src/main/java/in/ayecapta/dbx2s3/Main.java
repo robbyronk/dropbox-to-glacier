@@ -93,6 +93,7 @@ public class Main {
                 InputStream body = downloader.body;
                 try {
                     copyToS3(body, child.path);
+                    client.delete(child.path);
                 } catch (Exception e) {
                     System.err.print("Problem copying " + child.path + ". ");
                     System.err.println("DO NOT DELETE.");
